@@ -120,7 +120,8 @@ angular.module('redglow.gw2api', [])
 							isRejection: false
 						};
 					}
-					var queueId, queueRow;
+					var queueId, queueRow,
+						notId = function(value) { return value != id; };
 					for(i = 0; i < data.length; i++) {
 						item = data[i];
 						id = item.id;
@@ -130,7 +131,7 @@ angular.module('redglow.gw2api', [])
 							numRunningRequests--;
 						}
 						delete request.queued[id];
-						queueIds = $filter('filter')(queueIds, function(value) { return value != id});
+						queueIds = $filter('filter')(queueIds, notId);
 					}
 					for(i = 0; i < queueIds.length; i++) {
 						queueId = queueIds[i];
