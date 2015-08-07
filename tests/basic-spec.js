@@ -227,38 +227,53 @@ describe('GW2API', function() {
 			$provide.value('Now', nowService);
 		}));
 		
-		it('correctly manages the cache', inject(function($httpBackend, $timeout, $rootScope, GW2API) {
+		function cacheTest($httpBackend, $timeout, $rootScope, GW2API, id) {
 			var delta = GW2API.getItemsEntrySecondsDuration() * 1000;
-			var itemResponse = globalItems.item24305;
-			$httpBackend.expect("GET", "https://api.guildwars2.com/v2/items?ids=24305").respond([itemResponse]);
+			var itemResponse = id == 999 ? {text: 'no such id'} : globalItems.items[id];
+			var status = id == 999 ? 404 : 200;
+			var returnedJSON = id == 999 ? itemResponse : [itemResponse];
+			function prep() {
+				$httpBackend.expect("GET", "https://api.guildwars2.com/v2/items?ids=" + id)
+					.respond(status, returnedJSON);
+			}
+			prep();
 			var obtainedItem = null;
-			GW2API.getItem(24305)
-				.then(function(data) {
-					obtainedItem = data;
-				});
+			function get() {
+				GW2API.getItem(id)
+					.then(function(data) {
+						if(id == 999) { fail("Shouldn't return an item"); }
+						obtainedItem = data;
+					}, function(data) {
+						if(id != 999) { fail("Should return an item"); }
+						obtainedItem = data;
+					});
+			}
+			get();
 			$timeout.flush(GW2API.getTimeoutDelay() * 2);
 			$httpBackend.flush();
 			expect(obtainedItem).toEqual(itemResponse);
 			// wait a bit, without reaching expiration
 			nowService.millitime += delta / 2;
 			obtainedItem = null;
-			GW2API.getItem(24305)
-				.then(function(data) {
-					obtainedItem = data;
-				});
+			get();
 			$rootScope.$apply();
 			expect(obtainedItem).toEqual(itemResponse);
 			// wait a bit more, surpassing expiration
-			$httpBackend.expect("GET", "https://api.guildwars2.com/v2/items?ids=24305").respond([itemResponse]);
+			prep();
 			nowService.millitime += delta;
 			obtainedItem = null;
-			GW2API.getItem(24305)
-				.then(function(data) {
-					obtainedItem = data;
-				});
+			get();
 			$timeout.flush(GW2API.getTimeoutDelay() * 2);
 			$httpBackend.flush();
 			expect(obtainedItem).toEqual(itemResponse);
+		}
+		
+		it('correctly manages the cache', inject(function($httpBackend, $timeout, $rootScope, GW2API) {
+			cacheTest($httpBackend, $timeout, $rootScope, GW2API, 24305);
+		}));
+		
+		it('correctly manages the negative cache', inject(function($httpBackend, $timeout, $rootScope, GW2API) {
+			cacheTest($httpBackend, $timeout, $rootScope, GW2API, 999);
 		}));
 	});
 });

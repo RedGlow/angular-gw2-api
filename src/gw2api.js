@@ -22,7 +22,7 @@ angular.module('redglow.gw2api', [])
 	provider.language = null;
 
 
-	this.$get = function($q, $http, $log, $timeout, Now) {
+	this.$get = function($q, $http, $log, $timeout, $filter, Now) {
 		/**
 		 * This structure holds the data about the different kind of requests we can
 		 * make to the GW2 API, its endpoints, the enqueued requests, and the
@@ -130,13 +130,7 @@ angular.module('redglow.gw2api', [])
 							numRunningRequests--;
 						}
 						delete request.queued[id];
-						for(var k = 0; k < queueIds.length; k++) {
-							queueId = queueIds[k];
-							if(queueId == id) {
-								queueIds.splice(k, 1);
-								break;
-							}
-						}
+						queueIds = $filter('filter')(queueIds, function(value) { return value != id});
 					}
 					for(i = 0; i < queueIds.length; i++) {
 						queueId = queueIds[i];
