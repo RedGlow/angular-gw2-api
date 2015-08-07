@@ -3091,6 +3091,7 @@ function basePrepare($httpBackend, collection, baseUrl, extraArguments) {
 			}
 		}
 	}
+	w(baseUrl + '?ids=1999', '', 500);
 	return allResponses;
 };
 

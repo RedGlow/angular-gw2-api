@@ -214,7 +214,8 @@ angular.module('redglow.gw2api', [])
 			if(cacheEntry !== undefined) {
 				// we have a cache entry: check if it's not too old
 				var cacheDate = cacheEntry.timestamp;
-				var delta = ((Now.value()) - cacheDate) / 1000;
+				var now = Now.value();
+				var delta = (now - cacheDate) / 1000;
 				if(delta <= request.entrySecondsDuration) {
 					// not too old: we can return it
 					if(!cacheEntry.isRejection) {
@@ -273,6 +274,9 @@ angular.module('redglow.gw2api', [])
 			},
 			getTimeoutDelay: function() {
 				return provider.timeoutDelay;
+			},
+			getItemsEntrySecondsDuration: function() {
+				return provider.itemsEntrySecondsDuration;
 			}
 		};
 	};

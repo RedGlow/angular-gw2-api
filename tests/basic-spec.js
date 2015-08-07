@@ -168,6 +168,20 @@ describe('GW2API', function() {
 				$httpBackend.flush();
 				expect(obtainedItem).toEqual({"text": "no such id"});
 			}));
+			
+			it('correctly manages server errors', inject(function($httpBackend, $timeout, $rootScope, GW2API) {
+				prepare($httpBackend);
+				var obtainedError = null;
+				GW2API[functionName](1999)
+					.then(function(data) {
+						fail("shouldn't obtain any data");
+					}, function(data) {
+						obtainedError = data;
+					});
+				$timeout.flush(GW2API.getTimeoutDelay() * 2);
+				$httpBackend.flush();
+				expect(obtainedError.status).toBe(500);
+			}));
 		});
 	}
 	testIdInterface('item', 'getItem', globalItems.items, globalItems.prepareItem);
@@ -199,5 +213,52 @@ describe('GW2API', function() {
 			expect(GW2API.getNumRunningRequests()).toBe(0);
 			expect(obtainedItem).toEqual(itemResponse);
 		}));
-	})
+	});
+
+	describe('', function() {
+		var start = Date.now();
+		var nowService = {
+			millitime: start,
+			value: function() {
+				return new Date(nowService.millitime);
+			}
+		};
+		beforeEach(module(function($provide) {
+			$provide.value('Now', nowService);
+		}));
+		
+		it('correctly manages the cache', inject(function($httpBackend, $timeout, $rootScope, GW2API) {
+			var delta = GW2API.getItemsEntrySecondsDuration() * 1000;
+			var itemResponse = globalItems.item24305;
+			$httpBackend.expect("GET", "https://api.guildwars2.com/v2/items?ids=24305").respond([itemResponse]);
+			var obtainedItem = null;
+			GW2API.getItem(24305)
+				.then(function(data) {
+					obtainedItem = data;
+				});
+			$timeout.flush(GW2API.getTimeoutDelay() * 2);
+			$httpBackend.flush();
+			expect(obtainedItem).toEqual(itemResponse);
+			// wait a bit, without reaching expiration
+			nowService.millitime += delta / 2;
+			obtainedItem = null;
+			GW2API.getItem(24305)
+				.then(function(data) {
+					obtainedItem = data;
+				});
+			$rootScope.$apply();
+			expect(obtainedItem).toEqual(itemResponse);
+			// wait a bit more, surpassing expiration
+			$httpBackend.expect("GET", "https://api.guildwars2.com/v2/items?ids=24305").respond([itemResponse]);
+			nowService.millitime += delta;
+			obtainedItem = null;
+			GW2API.getItem(24305)
+				.then(function(data) {
+					obtainedItem = data;
+				});
+			$timeout.flush(GW2API.getTimeoutDelay() * 2);
+			$httpBackend.flush();
+			expect(obtainedItem).toEqual(itemResponse);
+		}));
+	});
 });
