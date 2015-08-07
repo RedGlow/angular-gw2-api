@@ -142,7 +142,7 @@ angular.module('redglow.gw2api', [])
 						queueId = queueIds[i];
 						queueRow = request.queued[queueId];
 						var returnValue = {
-							"text": "all ids provided are invalid"
+							"text": "no such id"
 						};
 						request.cache[queueId] = {
 							timestamp: now,
@@ -157,14 +157,16 @@ angular.module('redglow.gw2api', [])
 					}
 				}, function(err) {
 					var i, queueId, queueRow, j;
-					if(!!err.data && !!err.data.text && err.data.text == "all ids provided are invalid") {
+					if(!!err.data && !!err.data.text && (
+						err.data.text == "all ids provided are invalid" ||
+						err.data.text == "no such id")) {
 						// all values are invalid
 						var now = Now.value();
 						for(i = 0; i < queueIds.length; i++) {
 							queueId = queueIds[i];
 							queueRow = request.queued[queueId];
 							var returnValue = {
-								"text": "all ids provided are invalid"
+								"text": "no such id"
 							};
 							request.cache[queueId] = {
 								timestamp: now,

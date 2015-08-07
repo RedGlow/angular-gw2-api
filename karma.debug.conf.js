@@ -8,13 +8,7 @@ module.exports = function(config) {
 			'tests/*-helper.js',
 			'tests/*-spec.js',
 		],
-		reporters: ['progress', 'coverage'],
-		coverageReporter: {
-			reporters: [
-				{ type: 'text' },
-				{ type: 'html', dir: 'coverage' }
-			]
-		},
+		reporters: ['progress'],
 		browsers: ['Chrome'],
 		singleRun: false
 	});
