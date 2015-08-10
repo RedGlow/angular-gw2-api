@@ -13,9 +13,10 @@ module.exports = function(config) {
 		],
 		reporters: ['progress', 'coverage'],
 		coverageReporter: {
+			dir: 'coverage',
 			reporters: [
 				{ type: 'text' },
-				{ type: 'html', dir: 'coverage' }
+				{ type: 'html' }
 			]
 		},
 		browsers: ['PhantomJS'],
