@@ -93,4 +93,17 @@ describe('GW2API', function() {
 		$httpBackend.flush();
 		expect(answer).toEqual(myResponse);
 	}));
+
+	it('correctly searches for recipes', inject(function($httpBackend, GW2API) {
+		var myToken = '0BF23BD3-AD51-E841-BAA9-72848B98E554';
+		var myResponse = [5114];
+		url = "https://api.guildwars2.com/v2/recipes/search?output=19622";
+		$httpBackend.expect('GET', url).respond(myResponse);
+		var answer;
+		GW2API.getRecipeIdsByOutput(19622).then(function(data) {
+			answer = data;
+		});
+		$httpBackend.flush();
+		expect(answer).toEqual(myResponse);
+	}));
 });
