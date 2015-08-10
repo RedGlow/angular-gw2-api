@@ -279,6 +279,9 @@ angular.module('redglow.gw2api', [])
 			getTokenInfo: function(token) {
 				return straightCall("https://api.guildwars2.com/v2/tokeninfo", token);
 			},
+			getBank: function(token) {
+				return straightCall("https://api.guildwars2.com/v2/account/bank", token);
+			},
 			getNumRunningRequests: function() {
 				return numRunningRequests;
 			},
