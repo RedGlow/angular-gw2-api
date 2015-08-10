@@ -75,4 +75,22 @@ describe('GW2API', function() {
 			"Reddeth Hrafnkin"
 		]);
 	}));
+
+	it('correctly asks for a character', inject(function($httpBackend, GW2API) {
+		var myToken = '0BF23BD3-AD51-E841-BAA9-72848B98E554';
+		var myResponse = {
+			"name": "test",
+			"race": "Norn"
+		};
+		url = "https://api.guildwars2.com/v2/characters/test";
+		$httpBackend.expect('GET', url, undefined, function(headers) {
+			return headers.Authorization == 'Bearer ' + myToken;
+		}).respond(myResponse);
+		var answer;
+		GW2API.getCharacter(myToken, 'test').then(function(data) {
+			answer = data;
+		});
+		$httpBackend.flush();
+		expect(answer).toEqual(myResponse);
+	}));
 });
