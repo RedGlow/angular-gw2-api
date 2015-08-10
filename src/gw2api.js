@@ -285,6 +285,9 @@ angular.module('redglow.gw2api', [])
 			getMaterials: function(token) {
 				return straightCall("https://api.guildwars2.com/v2/account/materials", token);
 			},
+			getCharacters: function(token) {
+				return straightCall("https://api.guildwars2.com/v2/characters", token);
+			},
 			getNumRunningRequests: function() {
 				return numRunningRequests;
 			},

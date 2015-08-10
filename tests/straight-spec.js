@@ -60,4 +60,19 @@ describe('GW2API', function() {
 			}
 		]);
 	}));
+	
+	it('correctly asks for the characters', inject(function($httpBackend, GW2API) {
+		doTest($httpBackend, GW2API, 'https://api.guildwars2.com/v2/characters', 'getCharacters', [
+			"Reddeth Gibur",
+			"Reddeth Tanaí",
+			"Reddeth Gurow",
+			"Reddeth Pondsson",
+			"Tacitus Valvecrash",
+			"Reddeth Paleclaw",
+			"Reddeth Fenn",
+			"Reddeth Kentar",
+			"Thaumaturgist Toxx",
+			"Reddeth Hrafnkin"
+		]);
+	}));
 });
