@@ -47,4 +47,34 @@ describe('GW2API', function() {
 		$httpBackend.flush();
 		expect(answer).toEqual(myResponse);
 	}));
+	
+	it('correctly asks for the materials', inject(function($httpBackend, GW2API) {
+		var myToken = '0BF23BD3-AD51-E841-BAA9-72848B98E554',
+			myResponse = [
+				{
+					"id": 12134,
+					"category": 5,
+					"count": 436
+				},
+				{
+					"id": 12238,
+					"category": 5,
+					"count": 126
+				},
+				{
+					"id": 12147,
+					"category": 5,
+					"count": 167
+				}
+			];
+		$httpBackend.expect('GET', 'https://api.guildwars2.com/v2/account/materials', undefined, function(headers) {
+			return headers.Authorization == 'Bearer ' + myToken;
+		}).respond(myResponse);
+		var answer;
+		GW2API.getMaterials(myToken).then(function(data) {
+			answer = data;
+		});
+		$httpBackend.flush();
+		expect(answer).toEqual(myResponse);
+	}));
 });
