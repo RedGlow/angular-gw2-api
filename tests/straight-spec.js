@@ -7,10 +7,13 @@ describe('GW2API', function() {
 			return headers.Authorization == 'Bearer ' + myToken;
 		}).respond(myResponse);
 		var answer;
+		expect(GW2API.getNumRunningRequests()).toBe(0);
 		GW2API[methodName](myToken).then(function(data) {
 			answer = data;
 		});
+		expect(GW2API.getNumRunningRequests()).toBe(1);
 		$httpBackend.flush();
+		expect(GW2API.getNumRunningRequests()).toBe(0);
 		expect(answer).toEqual(myResponse);
 	}
 	

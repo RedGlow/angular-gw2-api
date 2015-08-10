@@ -255,6 +255,7 @@ angular.module('redglow.gw2api', [])
 		}
 		
 		function straightCall(url, token) {
+			numRunningRequests++;
 			return $http({
 				method: 'GET',
 				url: url,
@@ -263,6 +264,8 @@ angular.module('redglow.gw2api', [])
 				}
 			}).then(function(response) {
 				return response.data;
+			})['finally'](function() {
+				numRunningRequests--;
 			});
 		}
 
