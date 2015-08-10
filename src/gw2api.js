@@ -253,6 +253,18 @@ angular.module('redglow.gw2api', [])
 			// return the promise that will be satisfied upon resolution
 			return deferred.promise;
 		}
+		
+		function straightCall(url, token) {
+			return $http({
+				method: 'GET',
+				url: url,
+				headers: {
+					'Authorization': 'Bearer ' + token
+				}
+			}).then(function(response) {
+				return response.data;
+			});
+		}
 
 		return {
 			getItem: function(id) {
@@ -263,6 +275,9 @@ angular.module('redglow.gw2api', [])
 			},
 			getRecipe: function(id) {
 				return enqueue('recipes', id);
+			},
+			getTokenInfo: function(token) {
+				return straightCall("https://api.guildwars2.com/v2/tokeninfo", token);
 			},
 			getNumRunningRequests: function() {
 				return numRunningRequests;
