@@ -256,12 +256,12 @@ angular.module('redglow.gw2api', [])
 		
 		function straightCall(url, token) {
 			numRunningRequests++;
+			if(!!token) {
+				url = [url, "?access_token=", token].join("");
+			}
 			return $http({
 				method: 'GET',
-				url: url,
-				headers: {
-					'Authorization': 'Bearer ' + token
-				}
+				url: url
 			}).then(function(response) {
 				return response.data;
 			})['finally'](function() {

@@ -3,9 +3,12 @@ describe('GW2API', function() {
 	
 	function doTest($httpBackend, GW2API, url, methodName, myResponse) {
 		var myToken = '0BF23BD3-AD51-E841-BAA9-72848B98E554';
-		$httpBackend.expect('GET', url, undefined, function(headers) {
-			return headers.Authorization == 'Bearer ' + myToken;
-		}).respond(myResponse);
+		if(url.indexOf("?") == -1) {
+			url += "?access_token=" + myToken;
+		} else {
+			url += "&access_token=" + myToken;
+		}
+		$httpBackend.expect('GET', url, undefined).respond(myResponse);
 		var answer;
 		expect(GW2API.getNumRunningRequests()).toBe(0);
 		GW2API[methodName](myToken).then(function(data) {
@@ -85,10 +88,8 @@ describe('GW2API', function() {
 			"name": "test",
 			"race": "Norn"
 		};
-		url = "https://api.guildwars2.com/v2/characters/test";
-		$httpBackend.expect('GET', url, undefined, function(headers) {
-			return headers.Authorization == 'Bearer ' + myToken;
-		}).respond(myResponse);
+		var url = "https://api.guildwars2.com/v2/characters/test?access_token=" + myToken;
+		$httpBackend.expect('GET', url, undefined).respond(myResponse);
 		var answer;
 		GW2API.getCharacter(myToken, 'test').then(function(data) {
 			answer = data;
@@ -100,7 +101,7 @@ describe('GW2API', function() {
 	it('correctly searches for recipes', inject(function($httpBackend, GW2API) {
 		var myToken = '0BF23BD3-AD51-E841-BAA9-72848B98E554';
 		var myResponse = [5114];
-		url = "https://api.guildwars2.com/v2/recipes/search?output=19622";
+		var url = "https://api.guildwars2.com/v2/recipes/search?output=19622";
 		$httpBackend.expect('GET', url).respond(myResponse);
 		var answer;
 		GW2API.getRecipeIdsByOutput(19622).then(function(data) {
