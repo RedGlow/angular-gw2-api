@@ -1,5 +1,8 @@
 describe('GW2API', function() {
-	beforeEach(module('redglow.gw2api'));
+	beforeEach(module('redglow.gw2api', function(GW2APIProvider) {
+		// exclude the local storage usage
+		GW2APIProvider.cacheFactories = [];
+	}));
 	
 	function doTest($httpBackend, GW2API, url, methodName, myResponse) {
 		var myToken = '0BF23BD3-AD51-E841-BAA9-72848B98E554';

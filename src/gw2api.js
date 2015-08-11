@@ -20,9 +20,111 @@ angular.module('redglow.gw2api', [])
 	provider.timeoutDelay = 250;
 	// default language (null => no language sent; value => language value sent)
 	provider.language = null;
+	// cache providers: an array of injectable functions which are launched in given order, and
+	// the first that returns a non-falsy object is used as the cache object, which is
+	// an object with the following functions:
+	// - set(familyKey, idKey, value): sets a value <value> associated to the tuple <familyKey>,
+	//   <idKey>
+	// - get(familyKey, idKey): returns the value associated with the tuple <familyKey>, <idKey>
+	provider.localStorageFactory = function($window) {
+		// taken from ngStorage project
+		function isStorageSupported() {
+			// Some installations of IE, for an unknown reason, throw "SCRIPT5: Error: Access is denied"
+			// when accessing window.localStorage. This happens before you try to do anything with it. Catch
+			// that error and allow execution to continue.
 
+			// fix 'SecurityError: DOM Exception 18' exception in Desktop Safari, Mobile Safari
+			// when "Block cookies": "Always block" is turned on
+			var supported;
+			try {
+				supported = $window.localStorage;
+			}
+			catch (err) {
+				supported = false;
+			}
 
-	this.$get = function($q, $http, $log, $timeout, $filter, Now) {
+			// When Safari (OS X or iOS) is in private browsing mode, it appears as though localStorage
+			// is available, but trying to call .setItem throws an exception below:
+			// "QUOTA_EXCEEDED_ERR: DOM Exception 22: An attempt was made to add something to storage that exceeded the quota."
+			if (supported) {
+				var key = '__' + Math.round(Math.random() * 1e7);
+
+				try {
+					localStorage.setItem(key, key);
+					localStorage.removeItem(key);
+				}
+				catch (err) {
+					supported = false;
+				}
+			}
+
+			return supported;
+		}
+		if(!isStorageSupported()) {
+			return false;
+		}
+		function key(familyKey, idKey) {
+			return 'gw2api-' + familyKey + '-' + idKey;
+		}
+		return {
+			get: function(familyKey, idKey) {
+				var item = $window.localStorage.getItem(
+					key(familyKey, idKey));
+				if(item === null) {
+					return undefined;
+				} else {
+					var returnValue = angular.fromJson(item);
+					returnValue.timestamp = new Date(returnValue.timestamp);
+					return returnValue;
+				}
+			},
+			set: function(familyKey, idKey, value) {
+				return $window.localStorage.setItem(
+					key(familyKey, idKey),
+					angular.toJson(value));
+			},
+			del: function(familyKey, idKey) {
+				$window.localStorage.removeItem(key(familyKey, idKey));
+			}
+		};
+	};
+	provider.cacheFactories = [
+		provider.localStorageFactory
+	];
+
+	this.$get = function($injector, $q, $http, $log, $timeout, $filter, Now) {
+		/* produce the main cache object */
+		var mainCacheObject = null;
+		for(var cacheFactoryIndex = 0; cacheFactoryIndex < provider.cacheFactories.length; cacheFactoryIndex++) {
+			var cacheFactory = provider.cacheFactories[cacheFactoryIndex];
+			var obtainedCache = $injector.invoke(cacheFactory);
+			if(!!obtainedCache) {
+				mainCacheObject = obtainedCache;
+				break;
+			}
+		}
+		if(!mainCacheObject) {
+			var mainCache = {};
+			var getMainCacheFamilyEntry = function(familyKey) {
+				if(!mainCache[familyKey]) {
+					mainCache[familyKey] = {};
+				}
+				return mainCache[familyKey];
+			};
+			mainCacheObject = {
+				get: function(familyKey, idKey) {
+					return getMainCacheFamilyEntry(familyKey)[idKey];
+				},
+				set: function(familyKey, idKey, value) {
+					getMainCacheFamilyEntry(familyKey)[idKey] = value;
+				},
+				del: function(familyKey, idKey) {
+					var familyEntry = getMainCacheFamilyEntry(familyKey);
+					delete familyEntry[idKey];
+				}
+			};
+		}
+		
 		/**
 		 * This structure holds the data about the different kind of requests we can
 		 * make to the GW2 API, its endpoints, the enqueued requests, and the
@@ -55,11 +157,11 @@ angular.module('redglow.gw2api', [])
 		 *	  <timestamp> is a Date object produced at the moment of the entry
 		 *	  creation.
 		 */
-		function produceRequestsEntry(entrySecondsDuration, endpoint) {
+		function produceRequestsEntry(name, entrySecondsDuration, endpoint) {
 			return {
+				name: name,
 				queue: {},
 				queued: {},
-				cache: {},
 				entrySecondsDuration: entrySecondsDuration,
 				timerIsStarted: false,
 				endpoint: endpoint
@@ -68,12 +170,15 @@ angular.module('redglow.gw2api', [])
 		var numRunningRequests = 0;
 		var requests = {
 			items: produceRequestsEntry(
+				"items",
 				provider.itemsEntrySecondsDuration,
 				"https://api.guildwars2.com/v2/items"),
 			listings: produceRequestsEntry(
+				"listings",
 				provider.listingsEntrySecondsDuration,
 				"https://api.guildwars2.com/v2/commerce/listings"),
 			recipes: produceRequestsEntry(
+				"recipes",
 				provider.recipesEntrySecondsDuration,
 				"https://api.guildwars2.com/v2/recipes"),
 		};
@@ -114,11 +219,11 @@ angular.module('redglow.gw2api', [])
 					for(i = 0; i < data.length; i++) {
 						item = data[i];
 						id = item.id;
-						request.cache[id] = {
+						mainCacheObject.set(request.name, id, {
 							timestamp: now,
 							value: item,
 							isRejection: false
-						};
+						});
 					}
 					var queueId, queueRow,
 						notId = function(value) { return value != id; };
@@ -139,11 +244,11 @@ angular.module('redglow.gw2api', [])
 						var returnValue = {
 							"text": "no such id"
 						};
-						request.cache[queueId] = {
+						mainCacheObject.set(request.name, queueId, {
 							timestamp: now,
 							value: returnValue,
 							isRejection: true
-						};
+						});
 						for(var jj = 0; jj < queueRow.length; jj++) {
 							queueRow[jj].reject(returnValue);
 							numRunningRequests--;
@@ -163,11 +268,11 @@ angular.module('redglow.gw2api', [])
 							var returnValue = {
 								"text": "no such id"
 							};
-							request.cache[queueId] = {
+							mainCacheObject.set(request.name, queueId, {
 								timestamp: now,
 								value: returnValue,
 								isRejection: true
-							};
+							});
 							for(j = 0; j < queueRow.length; j++) {
 								queueRow[j].reject(returnValue);
 								numRunningRequests--;
@@ -205,7 +310,7 @@ angular.module('redglow.gw2api', [])
 
 			// check cache
 			var request = requests[key];
-			var cacheEntry = request.cache[id];
+			var cacheEntry = mainCacheObject.get(request.name, id);
 			if(cacheEntry !== undefined) {
 				// we have a cache entry: check if it's not too old
 				var cacheDate = cacheEntry.timestamp;
@@ -220,7 +325,7 @@ angular.module('redglow.gw2api', [])
 					}
 				} else {
 					// remove the entry to clean up some space
-					delete request.cache[id];
+					mainCacheObject.del(request.name, id);
 				}
 			}
 

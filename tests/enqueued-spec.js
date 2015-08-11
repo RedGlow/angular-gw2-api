@@ -1,5 +1,8 @@
 describe('GW2API', function() {
-	beforeEach(module('redglow.gw2api'));
+	beforeEach(module('redglow.gw2api', function(GW2APIProvider) {
+		// exclude the local storage usage
+		GW2APIProvider.cacheFactories = [];
+	}));
 	
 	function testIdInterface(name, functionName, collection, prepare) {
 		var ids = Object.getOwnPropertyNames(collection);
