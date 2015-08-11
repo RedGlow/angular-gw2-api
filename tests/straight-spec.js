@@ -91,7 +91,7 @@ describe('GW2API', function() {
 		var url = "https://api.guildwars2.com/v2/characters/test?access_token=" + myToken;
 		$httpBackend.expect('GET', url, undefined).respond(myResponse);
 		var answer;
-		GW2API.getCharacter(myToken, 'test').then(function(data) {
+		GW2API.getCharacter('test', myToken).then(function(data) {
 			answer = data;
 		});
 		$httpBackend.flush();

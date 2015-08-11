@@ -291,7 +291,7 @@ angular.module('redglow.gw2api', [])
 			getCharacters: function(token) {
 				return straightCall("https://api.guildwars2.com/v2/characters", token);
 			},
-			getCharacter: function(token, characterName) {
+			getCharacter: function(characterName, token) {
 				return straightCall("https://api.guildwars2.com/v2/characters/" + characterName, token);
 			},
 			getRecipeIdsByOutput: function(outputId) {
