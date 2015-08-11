@@ -16,8 +16,8 @@
     "api"
   ],
   "files": [
-	"build/gw2api.min.js",
-	"src/gw2api.js"
+    "build/gw2api.min.js",
+    "src/gw2api.js"
   ],
   "author": "Mattia Belletti",
   "license": "MIT",
