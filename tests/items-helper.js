@@ -2973,6 +2973,21 @@ ctx.recipe843 = {
   "id": 843
 };
 
+ctx.currency4 = {
+  "id": 4,
+  "name": "Gem",
+  "description": "Purchased and spent via the Black Lion Trading Company.",
+  "order": 0,
+  "icon": "https://render.guildwars2.com/file/220061640ECA41C0577758030357221B4ECCE62C/502065.png"
+};
+ctx.currency10 = {
+  "id": 10,
+  "name": "Manifesto of the Moletariate",
+  "description": "Earned in Sorrow's Embrace. Spent in Lion's Arch to purchase rare and exotic gear, runes and sigils, crafting materials, and the \"Gift of the Forgeman\" component used in creating legendary weapons.",
+  "order": 140,
+  "icon": "https://render.guildwars2.com/file/B83A4ED528FC237D4D1862CDD0250B773EAB36AA/619323.png"
+};
+
 ctx.items = {
 	24305: ctx.item24305,
 	19677: ctx.item19677
@@ -2986,6 +3001,11 @@ ctx.listings = {
 ctx.recipes = {
 	843: ctx.recipe843,
 	3166: ctx.recipe3166
+};
+
+ctx.currencies = {
+	4: ctx.currency4,
+	10: ctx.currency10
 };
 
 function permute(input) {
@@ -3105,6 +3125,10 @@ ctx.prepareListing = function($httpBackend) {
 
 ctx.prepareRecipe = function($httpBackend) {
 	return basePrepare($httpBackend, ctx.recipes, 'https://api.guildwars2.com/v2/recipes', arguments);
+}
+
+ctx.prepareCurrency = function($httpBackend) {
+	return basePrepare($httpBackend, ctx.currencies, 'https://api.guildwars2.com/v2/currencies', arguments);
 }
 
 return ctx;

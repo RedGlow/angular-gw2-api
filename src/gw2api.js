@@ -16,6 +16,8 @@ angular.module('redglow.gw2api', [])
 	provider.recipesEntrySecondsDuration = 60 * 60 * 24;
 	// listings last for a much shorter time
 	provider.listingsEntrySecondsDuration = 60;
+	// currencies last long
+	provider.currenciesEntrySecondsDuration = 60 * 60 * 24;
 	// timeout delay
 	provider.timeoutDelay = 250;
 	// default language (null => no language sent; value => language value sent)
@@ -181,6 +183,10 @@ angular.module('redglow.gw2api', [])
 				"recipes",
 				provider.recipesEntrySecondsDuration,
 				"https://api.guildwars2.com/v2/recipes"),
+			currencies: produceRequestsEntry(
+				"currencies",
+				provider.currenciesEntrySecondsDuration,
+				"https://api.guildwars2.com/v2/currencies"),
 		};
 
 		function runRequests(key) {
@@ -413,7 +419,10 @@ angular.module('redglow.gw2api', [])
 			},
 			getCurrencies: function() {
 				return straightCall("https://api.guildwars2.com/v2/currencies");
-			}
+			},
+			getCurrency: function(id) {
+				return enqueue('currencies', id);
+			},
 		};
 	};
 
