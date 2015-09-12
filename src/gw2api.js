@@ -410,6 +410,9 @@ angular.module('redglow.gw2api', [])
 			},
 			getItemsEntrySecondsDuration: function() {
 				return provider.itemsEntrySecondsDuration;
+			},
+			getCurrencies: function() {
+				return straightCall("https://api.guildwars2.com/v2/currencies");
 			}
 		};
 	};

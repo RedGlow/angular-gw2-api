@@ -4,12 +4,14 @@ describe('GW2API', function() {
 		GW2APIProvider.cacheFactories = [];
 	}));
 	
-	function doTest($httpBackend, GW2API, url, methodName, myResponse) {
+	function doTest($httpBackend, GW2API, url, methodName, myResponse, skipToken) {
 		var myToken = '0BF23BD3-AD51-E841-BAA9-72848B98E554';
-		if(url.indexOf("?") == -1) {
-			url += "?access_token=" + myToken;
-		} else {
-			url += "&access_token=" + myToken;
+		if(!skipToken) {
+			if(url.indexOf("?") == -1) {
+				url += "?access_token=" + myToken;
+			} else {
+				url += "&access_token=" + myToken;
+			}
 		}
 		$httpBackend.expect('GET', url, undefined).respond(myResponse);
 		var answer;
@@ -112,5 +114,31 @@ describe('GW2API', function() {
 		});
 		$httpBackend.flush();
 		expect(answer).toEqual(myResponse);
+	}));
+	
+	it('correctly asks for the currencies', inject(function($httpBackend, GW2API) {
+		doTest($httpBackend, GW2API, 'https://api.guildwars2.com/v2/currencies', 'getCurrencies', [
+			1,
+			2,
+			3,
+			4,
+			5,
+			6,
+			7,
+			9,
+			10,
+			11,
+			12,
+			13,
+			14,
+			15,
+			16,
+			18,
+			23,
+			24,
+			25,
+			26,
+			27
+		], true);
 	}));
 });
