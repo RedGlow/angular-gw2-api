@@ -423,6 +423,9 @@ angular.module('redglow.gw2api', [])
 			getCurrency: function(id) {
 				return enqueue('currencies', id);
 			},
+			getWallet: function(token) {
+				return straightCall("https://api.guildwars2.com/v2/account/wallet", token);
+			}
 		};
 	};
 

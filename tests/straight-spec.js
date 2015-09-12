@@ -141,4 +141,93 @@ describe('GW2API', function() {
 			27
 		], true);
 	}));
+
+	it('correctly asks for the wallet contents', inject(function($httpBackend, GW2API) {
+		doTest($httpBackend, GW2API, 'https://api.guildwars2.com/v2/account/wallet', 'getWallet', [
+			{
+				"id": 1,
+				"value": 9107193
+			},
+			{
+				"id": 2,
+				"value": 2937100
+			},
+			{
+				"id": 3,
+				"value": 546
+			},
+			{
+				"id": 5,
+				"value": 75
+			},
+			{
+				"id": 6,
+				"value": 162
+			},
+			{
+				"id": 7,
+				"value": 111
+			},
+			{
+				"id": 9,
+				"value": 201
+			},
+			{
+				"id": 10,
+				"value": 198
+			},
+			{
+				"id": 11,
+				"value": 99
+			},
+			{
+				"id": 12,
+				"value": 213
+			},
+			{
+				"id": 13,
+				"value": 657
+			},
+			{
+				"id": 14,
+				"value": 36
+			},
+			{
+				"id": 15,
+				"value": 1972
+			},
+			{
+				"id": 16,
+				"value": 9
+			},
+			{
+				"id": 17,
+				"value": 428
+			},
+			{
+				"id": 18,
+				"value": 39
+			},
+			{
+				"id": 23,
+				"value": 2225
+			},
+			{
+				"id": 24,
+				"value": 18
+			},
+			{
+				"id": 25,
+				"value": 130
+			},
+			{
+				"id": 26,
+				"value": 750
+			},
+			{
+				"id": 27,
+				"value": 2894
+			}
+		]);
+	}));
 });
