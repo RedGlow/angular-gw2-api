@@ -1,8 +1,8 @@
 {
   "name": "angular-gw2-api",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Angular wrapper to the Guild Wars 2 API.",
-  "main": "index.js",
+  "main": "src/gw2api.js",
   "scripts": {
     "test": "npm install && ./node_modules/.bin/grunt"
   },
