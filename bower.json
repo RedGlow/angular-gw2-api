@@ -1,0 +1,25 @@
+{
+  "name": "angular-gw2-api",
+  "version": "0.1.10",
+  "homepage": "https://github.com/RedGlow/angular-gw2-api",
+  "authors": [
+    "Mattia <mattia.belletti@gmail.com>"
+  ],
+  "description": "Angular wrapper to the Guild Wars 2 API.",
+  "main": "build/gw2api.min.js",
+  "keywords": [
+    "angular",
+    "gw2",
+    "api"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+	"coverage",
+    "test",
+    "tests",
+	"_SpecRunner.html"
+  ]
+}
