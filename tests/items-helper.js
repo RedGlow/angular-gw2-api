@@ -2988,6 +2988,9 @@ ctx.currency10 = {
   "icon": "https://render.guildwars2.com/file/B83A4ED528FC237D4D1862CDD0250B773EAB36AA/619323.png"
 };
 
+ctx.achievement100 = {"id":100,"name":"Shiverpeak Explorer","description":"You've explored the frozen stomping grounds of the legendary norn.","requirement":"Explore all areas in the Shiverpeaks.","type":"Default","flags":[]};
+ctx.achievement200 = {"id":200,"name":"Branded Mine","description":"Survive the heights of the Branded Mine.","requirement":"Complete the jumping puzzle.","type":"Default","flags":[]};
+
 ctx.items = {
 	24305: ctx.item24305,
 	19677: ctx.item19677
@@ -3006,6 +3009,11 @@ ctx.recipes = {
 ctx.currencies = {
 	4: ctx.currency4,
 	10: ctx.currency10
+};
+
+ctx.achievements = {
+	100: ctx.achievement100,
+	200: ctx.achievement200
 };
 
 function permute(input) {
@@ -3129,6 +3137,10 @@ ctx.prepareRecipe = function($httpBackend) {
 
 ctx.prepareCurrency = function($httpBackend) {
 	return basePrepare($httpBackend, ctx.currencies, 'https://api.guildwars2.com/v2/currencies', arguments);
+}
+
+ctx.prepareAchievement = function($httpBackend) {
+	return basePrepare($httpBackend, ctx.achievements, 'https://api.guildwars2.com/v2/achievements', arguments);
 }
 
 return ctx;

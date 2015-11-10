@@ -18,6 +18,8 @@ angular.module('redglow.gw2api', [])
 	provider.listingsEntrySecondsDuration = 60;
 	// currencies last long
 	provider.currenciesEntrySecondsDuration = 60 * 60 * 24;
+	// achievements last long
+	provider.achievementsEntrySecondsDuration = 60 * 60 * 24;
 	// timeout delay
 	provider.timeoutDelay = 250;
 	// default language (null => no language sent; value => language value sent)
@@ -187,6 +189,10 @@ angular.module('redglow.gw2api', [])
 				"currencies",
 				provider.currenciesEntrySecondsDuration,
 				"https://api.guildwars2.com/v2/currencies"),
+			achievements: produceRequestsEntry(
+				"achievements",
+				provider.achievementsEntrySecondsDuration,
+				"https://api.guildwars2.com/v2/achievements"),
 		};
 
 		function runRequests(key) {
@@ -425,6 +431,15 @@ angular.module('redglow.gw2api', [])
 			},
 			getWallet: function(token) {
 				return straightCall("https://api.guildwars2.com/v2/account/wallet", token);
+			},
+			getAchievements: function() {
+				return straightCall("https://api.guildwars2.com/v2/achievements");
+			},
+			getAchievement: function(id) {
+				return enqueue('achievements', id);
+			},
+			getAccountAchievements: function(token) {
+				return straightCall("https://api.guildwars2.com/v2/account/achievements", token);
 			}
 		};
 	};

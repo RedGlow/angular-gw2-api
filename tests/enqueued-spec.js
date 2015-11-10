@@ -188,6 +188,7 @@ describe('GW2API', function() {
 	testIdInterface('listing', 'getListing', globalItems.listings, globalItems.prepareListing);
 	testIdInterface('recipe', 'getRecipe', globalItems.recipes, globalItems.prepareRecipe);
 	testIdInterface('currency', 'getCurrency', globalItems.currencies, globalItems.prepareCurrency);
+	testIdInterface('achievement', 'getAchievement', globalItems.achievements, globalItems.prepareAchievement);
 	
 	describe('', function() {
 		beforeEach(module('redglow.gw2api', function(GW2APIProvider) {
