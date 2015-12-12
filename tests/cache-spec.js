@@ -57,14 +57,14 @@ describe('GW2API', function() {
 		$rootScope.$apply();
 	}
 	
-	describe('can use a clear local storage.', function($httpBackend, $timeout, $rootScope, GW2API) {
+	describe('can use a clear local storage.', function() {
 		it('', inject(function($httpBackend, $timeout, $rootScope, GW2API) {
 			doTest($httpBackend, $timeout, $rootScope, GW2API, false);
 			window.localStorage.clear();
 		}));
 	});
 	
-	describe('can correcly skip local storage if the setItem returns error.', function($httpBackend, $timeout, $rootScope, GW2API) {
+	describe('can correcly skip local storage if the setItem returns error.', function() {
 		var originalSetItem;
 		beforeEach(module(function($provide) {
 			$provide.factory('$window', function() {
@@ -86,7 +86,7 @@ describe('GW2API', function() {
 		}));
 	});
 
-	describe('can correcly skip local storage if local storage is not supported.', function($httpBackend, $timeout, $rootScope, GW2API) {
+	describe('can correcly skip local storage if local storage is not supported.', function() {
 		beforeEach(module(function($provide) {
 			$provide.factory('$window', function() {
 				var w = {
@@ -105,7 +105,7 @@ describe('GW2API', function() {
 		}));
 	});
 
-	describe('can re-use a local storage', function($httpBackend, $timeout, $rootScope, GW2API) {
+	describe('can re-use a local storage', function() {
 		it('', inject(function($httpBackend, $timeout, $rootScope, GW2API) {
 			doTest($httpBackend, $timeout, $rootScope, GW2API, false);
 		}));
