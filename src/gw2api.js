@@ -201,79 +201,56 @@ angular.module('redglow.gw2api', [])
 			request.timerIsStarted = false;
 
 			// move requests from "queue" to "queued", and clean "queue"
-			var queueIds = Object.keys(request.queue);
-			for(var i = 0; i < queueIds.length; i++) {
-				var id = queueIds[i];
+			var allQueueIds = Object.keys(request.queue);
+			for(var i = 0; i < allQueueIds.length; i++) {
+				var id = allQueueIds[i];
 				var deferreds = request.queue[id];
 				request.queued[id] = [];
 				Array.prototype.push.apply(request.queued[id], deferreds);
 			}
 			request.queue = {};
 
-			// launch http get
-			var ids = queueIds.join(",");
-			var url = request.endpoint + "?ids=" + ids;
-			if(!!provider.language) {
-				url += '&lang=';
-				url += provider.language;
-			}
-			$http
-				.get(url)
-				.then(function(response) {
-					// send results to the registered promises
-					var data = response.data;
-					var now = Now.value();
-					// first add caches, then process the promises. this is done in
-					// order to avoid that the answer to the promise asks for an
-					// item which we got right now, and a new call is enqueued
-					// because its entry wasn't yet added to the cache
-					var i, item, id;
-					for(i = 0; i < data.length; i++) {
-						item = data[i];
-						id = item.id;
-						mainCacheObject.set(request.name, id, {
-							timestamp: now,
-							value: item,
-							isRejection: false
-						});
-					}
-					var queueId, queueRow,
-						notId = function(value) { return value != id; };
-					for(i = 0; i < data.length; i++) {
-						item = data[i];
-						id = item.id;
-						queueRow = request.queued[id];
-						for(var j = 0; j < queueRow.length; j++) {
-							queueRow[j].resolve(item);
-							numRunningRequests--;
-						}
-						delete request.queued[id];
-						queueIds = $filter('filter')(queueIds, notId);
-					}
-					for(i = 0; i < queueIds.length; i++) {
-						queueId = queueIds[i];
-						queueRow = request.queued[queueId];
-						var returnValue = {
-							"text": "no such id"
-						};
-						mainCacheObject.set(request.name, queueId, {
-							timestamp: now,
-							value: returnValue,
-							isRejection: true
-						});
-						for(var jj = 0; jj < queueRow.length; jj++) {
-							queueRow[jj].reject(returnValue);
-							numRunningRequests--;
-						}
-						delete request.queued[queueId];
-					}
-				}, function(err) {
-					var i, queueId, queueRow, j;
-					if(!!err.data && !!err.data.text && (
-						err.data.text == "all ids provided are invalid" ||
-						err.data.text == "no such id")) {
-						// all values are invalid
+			// launch an http get and returns a promise satisfied once the related ids are resolved.
+			function getHttpPromise(queueIds) {
+				var ids = queueIds.join(",");
+				var url = request.endpoint + "?ids=" + ids;
+				if(!!provider.language) {
+					url += '&lang=';
+					url += provider.language;
+				}
+				return $http
+					.get(url)
+					.then(function(response) {
+						// send results to the registered promises
+						var data = response.data;
 						var now = Now.value();
+						// first add caches, then process the promises. this is done in
+						// order to avoid that the answer to the promise asks for an
+						// item which we got right now, and a new call is enqueued
+						// because its entry wasn't yet added to the cache
+						var i, item, id;
+						for(i = 0; i < data.length; i++) {
+							item = data[i];
+							id = item.id;
+							mainCacheObject.set(request.name, id, {
+								timestamp: now,
+								value: item,
+								isRejection: false
+							});
+						}
+						var queueId, queueRow,
+							notId = function(value) { return value != id; };
+						for(i = 0; i < data.length; i++) {
+							item = data[i];
+							id = item.id;
+							queueRow = request.queued[id];
+							for(var j = 0; j < queueRow.length; j++) {
+								queueRow[j].resolve(item);
+								numRunningRequests--;
+							}
+							delete request.queued[id];
+							queueIds = $filter('filter')(queueIds, notId);
+						}
 						for(i = 0; i < queueIds.length; i++) {
 							queueId = queueIds[i];
 							queueRow = request.queued[queueId];
@@ -285,26 +262,64 @@ angular.module('redglow.gw2api', [])
 								value: returnValue,
 								isRejection: true
 							});
-							for(j = 0; j < queueRow.length; j++) {
-								queueRow[j].reject(returnValue);
+							for(var jj = 0; jj < queueRow.length; jj++) {
+								queueRow[jj].reject(returnValue);
 								numRunningRequests--;
 							}
 							delete request.queued[queueId];
 						}
-					} else {
-						// this is another kind of error (HTTP level, 500, ...):
-						// return the same error, but without caching it
-						for(i = 0; i < queueIds.length; i++) {
-							queueId = queueIds[i];
-							queueRow = request.queued[queueId];
-							for(j = 0; j < queueRow.length; j++) {
-								queueRow[j].reject(err);
-								numRunningRequests--;
+					}, function(err) {
+						var i, queueId, queueRow, j;
+						if(!!err.data && !!err.data.text && (
+							err.data.text == "all ids provided are invalid" ||
+							err.data.text == "no such id")) {
+							// all values are invalid
+							var now = Now.value();
+							for(i = 0; i < queueIds.length; i++) {
+								queueId = queueIds[i];
+								queueRow = request.queued[queueId];
+								var returnValue = {
+									"text": "no such id"
+								};
+								mainCacheObject.set(request.name, queueId, {
+									timestamp: now,
+									value: returnValue,
+									isRejection: true
+								});
+								for(j = 0; j < queueRow.length; j++) {
+									queueRow[j].reject(returnValue);
+									numRunningRequests--;
+								}
+								delete request.queued[queueId];
 							}
-							delete request.queued[queueId];
+						} else {
+							// this is another kind of error (HTTP level, 500, ...):
+							// return the same error, but without caching it
+							for(i = 0; i < queueIds.length; i++) {
+								queueId = queueIds[i];
+								queueRow = request.queued[queueId];
+								for(j = 0; j < queueRow.length; j++) {
+									queueRow[j].reject(err);
+									numRunningRequests--;
+								}
+								delete request.queued[queueId];
+							}
 						}
-					}
+					});
+			}
+	
+			// run all requests in blocks of 200 (maxRequestedIds)		
+			var maxRequestedIds = 200;
+			var fullPromise = $q.when();
+			function enqueuePromise(ids) {
+				fullPromise = fullPromise.then(function() {
+					return getHttpPromise(ids);
 				});
+			}
+			for(var j = 0; j < allQueueIds.length; j += maxRequestedIds) {
+				var ids = allQueueIds.slice(j, j + maxRequestedIds);
+				enqueuePromise(ids);
+			}
 		}
 
 		function isInt(value) {

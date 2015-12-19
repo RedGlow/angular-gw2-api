@@ -278,4 +278,68 @@ describe('GW2API', function() {
 			cacheTest($httpBackend, $timeout, $rootScope, GW2API, 999);
 		}));
 	});
+	
+	describe('', function() {
+		function produceItem(id) {
+			return {
+				id: id,
+				name: "Item n. " + id
+			};
+		}
+		function prepareHttpBackend($httpBackend) {
+			// http backend
+			$httpBackend.expect('GET', /https:\/\/api.guildwars2.com\/v2\/items\?ids=(.*)/)
+				.respond(function(method, url, data, headers, params) {
+					var ids = url.split('=')[1].split(',');
+					if(ids.length > 200) {
+						return [400, '{"text":"id list too long; this endpoint is limited to 200 ids at once"}']
+					} else {
+						var data = [];
+						for(var i = 0; i < ids.length; i++) {
+							var id = ids[i];
+							var item = produceItem(id);
+							data.push(item);
+						}
+						var jsonData = JSON.stringify(data);
+						return [200, jsonData];
+					}
+				});
+		}
+		function getItems($timeout, $httpBackend, GW2API, numIds) {
+			for(var j = 0; j < Math.ceil(numIds / 200); j++) {
+				prepareHttpBackend($httpBackend);
+			}
+			var numResolved = 0;
+			for(var i = 0; i < numIds; i++) {
+				GW2API.getItem(i).then(function() {
+					numResolved++;
+				});
+			}
+			$timeout.flush(GW2API.getTimeoutDelay() * 2);
+            var numToResolve = Math.ceil(numIds / 200);
+            $httpBackend.flush(numToResolve);
+			expect(numResolved).toBe(numIds);
+		}
+		it('does correctly process 1 request', inject(function($httpBackend, $q, $timeout, GW2API) {
+			getItems($timeout, $httpBackend, GW2API, 1);
+		}));
+		it('does correctly process 199 requests', inject(function($httpBackend, $q, $timeout, GW2API) {
+			getItems($timeout, $httpBackend, GW2API, 199);
+		}));
+		it('does correctly process 200 requests', inject(function($httpBackend, $q, $timeout, GW2API) {
+			getItems($timeout, $httpBackend, GW2API, 200);
+		}));
+		it('does correctly process 201 requests', inject(function($httpBackend, $q, $timeout, GW2API) {
+			getItems($timeout, $httpBackend, GW2API, 201);
+		}));
+		it('does correctly process 399 requests', inject(function($httpBackend, $q, $timeout, GW2API) {
+			getItems($timeout, $httpBackend, GW2API, 399);
+		}));
+		it('does correctly process 400 requests', inject(function($httpBackend, $q, $timeout, GW2API) {
+			getItems($timeout, $httpBackend, GW2API, 400);
+		}));
+		it('does correctly process 401 requests', inject(function($httpBackend, $q, $timeout, GW2API) {
+			getItems($timeout, $httpBackend, GW2API, 401);
+		}));
+	});
 });
